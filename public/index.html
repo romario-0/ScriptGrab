@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+		<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+		<style>
+			.my_text
+			{
+			font-family:    Arial, Helvetica, sans-serif;
+			font-size:      16px;
+			font-weight:    bold;
+			}
+		</style>
+	</head>
+	<body style="align-content: center;">
+		<h1>Multisite</h1>
+		<form id="main-form" method="POST" action="/" >
+			<div class="container-fluid alert alert-success" id="divmain" name="divmain">
+				<div class="form-row docker" id="docker" name="docker">
+					<div class="col">
+						<button  type="button" class="btn btn btn-success btn-block" onclick="addsite()"  >Add New Site</button>
+					</div>
+					<div class="col">
+						<input type="text" class="dockerip form-control" id="dockerip" placeholder="dockerip" name="dockerip" />
+					</div>
+					<div class="col">
+						<input type="text" class="dockeruname form-control" id="dockeruname" placeholder="dockerusername" name="dockeruname" />
+					</div>
+					<div class="col">
+						<input type="text" class="dockerpwd form-control" id="dockerpwd" placeholder="dockerpwd" name="dockerpwd" />
+					</div>
+				</div>
+				<div class="col" id="divsites" name="divsites"></div>
+			</div>
+			<footer>
+				<div class="col">
+					<button  type="button" class="btn btn btn-success btn-block" onclick="start()"  >Submit for Form </button>
+				</div>
+			</footer>
+		</form>
+		<br>
+		<button  id="scriptButton" type="button" class="btn btn btn-success btn-block" style="width : 200px" onclick="getData()"  >GET DATA </button>
+		<div>
+			<p id="scriptMsg"></p>
+		</div>
+	</body>
+	<script s>
+		var fullsitear = [];
+		var sitear = new Array();
+		var sitecount = 0;
+		var headings = new Array();
+		headings[0] = ['Gray_Node_IP', 'SSH_Username','SSH_Password','+'];
+		headings[1] = ['ELK_Node_IP', 'SSH_Username', 'SSH_Password','+'];
+
+		function addsite() {
+			var divmain = document.getElementById('divmain');
+			var divmainsite = document.getElementById('divsites');
+			var divrowsite = document.createElement('div'); // row div for site
+			// var sitename =  sitecount +"sitename" ;
+			var dockerip = document.getElementById('dockerip').value;
+			var dockeruname = document.getElementById('dockeruname').value;
+			var dockerpwd = document.getElementById('dockerpwd').value;
+
+			var html = ''+
+			'<div class="form-group>' +
+			'<div class="col">' +
+			'<button  type="button" class="btn btn btn-danger btn-block" onclick="return this.parentNode.parentNode.remove();" >Remove site</button>' +
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text" class="sitename form-control"  id="sitename" placeholder="Site Name" name="sitename">' +
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text" class="promip form-control"   id="promip" placeholder="Prometheus IP" name="promip">' +
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text"   class="promuname form-control" id="promuname" placeholder="Prometheus SSH username" name="promuname">' +
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text" class="prompwd form-control" id="prompwd"  placeholder="Prometheus SSH Password" name="prompwd">' +
+			'</div>' +
+			'<div class="col">' +
+			'<button  type="button" class="btn btn btn-primary btn-block" onClick="addglrow(this )" />Add Graylog cluster</button>' +
+			'</div>' +
+			'</div>' ;  // end the row div
+
+			divrowsite.setAttribute('id','sites');
+			divrowsite.setAttribute('class','sites row');
+			divrowsite.innerHTML = html;
+			// divrowsite.style.backgroundColor = "#EAEDED";
+
+			// divmainsite.setAttribute('class','row');
+			divmainsite.appendChild(divrowsite);
+
+		}
+
+		function addglrow(mydiv) {
+			var divsite = mydiv.parentElement.parentElement;
+			// var glcount = sitear[sitecnt].graycnt;
+			// var elkcount = sitear[sitecnt].elkcnt;
+			// var divsite = document.getElementById(sitename);
+			var divgray = document.createElement('div'); // row div for graylog
+			divgray.setAttribute('class', 'form-group');
+			divgray.setAttribute('name', 'divgray');
+
+			var divgraytbl = document.createElement('div'); // row div for graylog table
+			var divelktbl = document.createElement('div'); // row div for graylog table
+
+			var html = '' +
+			'<div class="row">' +
+			'<div class="col">' +
+			'Gray Log Cluster Details' +
+			'</div>' +
+
+			'</div>' +
+			'<div class="row">' +
+			'<div class="col">' +
+			'<input type="text" class="glclus" id="glclus"  placeholder="Cluster Name" name="glclus">' +
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text" class="gluname" id="gluname" placeholder="Graylog Admin Username"  name="gluname">'+
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text" class="glpwd" id="glpwd"  placeholder="Graylog Admin password"  name="glpwd">' +
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text" class="mongouname" id="mongouname"  placeholder="MongoDB Admin Username"  name="mongouname">'+
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text" class="mongopwd" id="mongopwd"  placeholder="MongoDB Admin Password"  name="mongopwd">' +
+			'</div>' +
+			'<div class="col">' +
+			'<div class="input-group flex-nowrap">' +
+			'<span class="input-group-text" id="addon-wrapping">Port</span>' +
+			'<input type="text" class="mongoport form-control" id="mongoport"  placeholder="MongoDB Port"  name="mongoport">' +
+			'</div>' +
+			'</div>' +
+			'<div class="col">' +
+			'<button  type="button" class="button-error pure-button" onclick="return this.parentNode.parentNode.parentNode.remove();" />Remove Cluster</button>' +
+			'</div>' +
+			'</div>'+
+			'<div class="row">' +
+			'<div class="col-2">' +
+			'ELK Details' +
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text" class="elkclus" id="elkclus"   placeholder="ELastic Cluster Name"  name="elkclus">' +
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text" id="elkuname"   placeholder="Elastic Username" name="elkuname" class="elkuname">' +
+			'</div>' +
+			'<div class="col">' +
+			'<input type="text" id="elkpwd"   placeholder="Password"  name="elkpwd" class="elkpwd">' +
+			'</div>' +
+			'<div class="col">' +
+			'<div class="input-group flex-nowrap">' +
+			'<span class="input-group-text" id="addon-wrapping">Port</span>' +
+			'<input type="text" id="elkport"   placeholder="ELK port" class="elkport form-control" name="elkport" value="9200" >' +
+			'</div>' +
+			'</div>' +
+			'<div class="col"></div>' +
+			'</div>' ;
+
+			divgray.innerHTML = html;
+
+
+
+			var divtbls = document.createElement('div');
+			divtbls.setAttribute('class', 'row');
+
+			var graytable = document.createElement('table');
+			graytable.setAttribute('id', 'graytable'); // table id.
+			graytable.setAttribute('class', 'graytable table table-striped'); // table id.
+			graytable.setAttribute('name', 'graytable'); // table id.
+			//<!-- graytable.setAttribute("border","1px solid #000"); // table id. -->
+
+			var rowCnt = graytable.rows.length;
+			var tr = graytable.insertRow(rowCnt);
+
+
+			for (var h = 0; h < headings[0].length-1; h++) {
+				var th = document.createElement('th'); // create table headers
+				th.innerHTML = headings[0][h];
+				tr.appendChild(th);
+			}
+			var button = document.createElement('input');
+
+			// set input attributes.
+			button.setAttribute('name', 'graybutton');
+			button.setAttribute('type', 'button');
+			button.setAttribute('value', ' + ');
+			button.setAttribute('class', 'graybutton btn btn-primary btn-sm');
+
+			// add button's 'onclick' event.
+			button.setAttribute('onclick',"addnode(this,'graytable',0)");
+			// button.onclick = "removeglRow(this,gltable)";
+			td = tr.insertCell(h);
+			td.appendChild(button);
+
+
+			divgraytbl.setAttribute('class', 'col');
+			divgraytbl.appendChild(graytable);
+
+			// ADD Elastic Nodes Detail
+
+			var elktable = document.createElement('table');
+			elktable.setAttribute('id', 'elktable'); // table id.
+			elktable.setAttribute('class', 'elktable table table-striped'); // table id.
+			elktable.setAttribute('name', 'elktable'); // table id.
+			//<!-- elktable.setAttribute("border","1px solid #000"); // table id. -->
+
+			var rowCnt = elktable.rows.length;
+			var tr = elktable.insertRow(rowCnt);
+
+			for (var h = 0; h < headings[1].length-1; h++) {
+				var th = document.createElement('th'); // create table headers
+				th.innerHTML = headings[1][h];
+				tr.appendChild(th);
+			}
+
+			var button = document.createElement('input');
+
+			// set input attributes.
+			button.setAttribute('name', 'elkbutton');
+			button.setAttribute('type', 'button');
+			button.setAttribute('value', ' + ');
+			button.setAttribute('class', 'elkbutton btn btn-primary btn-sm');
+
+			// add button's 'onclick' event.
+			button.setAttribute('onclick',"addnode(this,'elktable',1)");
+
+			td = tr.insertCell(h);
+			td.appendChild(button);
+
+
+
+			divelktbl.setAttribute('class', 'col');
+			// html = '<div style= "color: red;" >Elastic Node Details</div>';
+			// divelktbl.innerHTML = html;
+			divelktbl.appendChild(elktable);
+
+			divtbls.appendChild(divgraytbl);
+			divtbls.appendChild(divelktbl);
+
+			divgray.appendChild(divtbls);
+			divsite.appendChild(divgray);
+
+			var btn = divtbls.getElementsByClassName('graybutton');
+			addnode(btn[0],'graytable',0);
+			var btn = divtbls.getElementsByClassName('elkbutton');
+			addnode(btn[0],'elktable',1);
+
+		}
+
+		// now, add a new to the TABLE. to graylog cluster
+		function addnode(myelement,tblname,side) {
+			// var table = document.getElementById(mytable).getElementsByTagName('tbody')[0];
+			var table = myelement.parentElement.parentElement.parentElement.parentElement;
+			// var table = document.getElementById(mytable);
+			var rowCnt = table.rows.length;   // table row graycount.
+
+			//tr = table.insertRow(rowCnt);
+			if (rowCnt > 1) {
+				var node=table.rows[rowCnt-1].cloneNode(true);    //clone the previous node or row
+				table.appendChild(node);   //add the node or row to the table
+			}
+			else {
+				var tr = table.insertRow(rowCnt); // the table row.
+
+
+				for (var c = 0; c < headings[side].length - 1; c++) {
+					//var td = document.createElement('td'); // table definition.
+					td = tr.insertCell(c);
+					var ele = document.createElement('input');
+					ele.setAttribute('type', 'text');
+					ele.setAttribute('value', '');
+					if (side == "0") {
+						ele.setAttribute('name','gl'+ headings[side][c] );
+
+					}
+					else {
+						ele.setAttribute('name', 'elk' + headings[side][c]);
+
+					}
+					td.appendChild(ele);
+				}
+				var button = document.createElement('input');
+
+				// set input attributes.
+				button.setAttribute('type', 'button');
+				button.setAttribute('value', ' X ');
+				button.setAttribute('class', 'btn btn-danger btn-sm');
+				button.setAttribute('onclick', 'return this.parentNode.parentNode.remove()');
+				td = tr.insertCell(c);
+				td.appendChild(button);
+			}
+
+		}
+
+
+		function start() {
+
+			var docker = document.getElementsByClassName('docker');
+			var dockerip = docker[0].getElementsByClassName('dockerip')[0].value;
+			var dockeruname = docker[0].getElementsByClassName('dockeruname')[0].value;
+			var dockerpwd = docker[0].getElementsByClassName('dockerpwd')[0].value;
+			var sites = document.getElementsByClassName('sites');
+			var sitename = '';
+			var promip = "";
+			var promuname = "";
+			var prompwd = "";
+			let leni = sites.length;
+			var jsonstr = '[';
+
+			jsonstr += '{ "all": ' +
+								'{"children": ' +
+									'{"nodeexporter": '+
+										'{"children": ' +
+											'{"docker": ' +
+												'{"hosts": ' +
+												   '{ "' + dockerip + '": ' +
+														'[ {"ansible_user": "'+ dockeruname + '"},{"ansible_ssh_pass": "' + dockerpwd + '"} ]' +
+												'} '+
+											'}, ' +
+											'"sites": ' +
+												'{"children": {' ;
+
+			if (leni < 1 ) {
+				alert("Atleast 1 Site needed");
+				document.getElementById(dockerip).focus();
+			}
+
+			for (var i = 0; i < leni; i++) {
+
+
+				sitename =  sites[i].getElementsByClassName('sitename');
+				promip =  sites[i].getElementsByClassName('promip');
+				promuname =  sites[i].getElementsByClassName('promuname');
+				prompwd =  sites[i].getElementsByClassName('prompwd');
+
+				jsonstr += '"' + sitename[0].value + '": ' +
+								'{ "children": ' +
+									'{"hosts": ' +
+										'{ "' + promip[0].value + '": ' +
+										'[ {"ansible_user": "'+ promuname[0].value + '"},{"ansible_ssh_pass": "' + prompwd[0].value + '"} ]},' ;
+
+
+				glclus = sites[i].getElementsByClassName('glclus');
+				gluname = sites[i].getElementsByClassName('gluname');
+				glpwd = sites[i].getElementsByClassName('glpwd');
+				mongouname = sites[i].getElementsByClassName('mongouname');
+				mongopwd = sites[i].getElementsByClassName('mongopwd');
+				mongoport = sites[i].getElementsByClassName('mongoport');
+				elkclus = sites[i].getElementsByClassName('elkclus');
+				elkuname = sites[i].getElementsByClassName('elkuname');
+				elkpwd = sites[i].getElementsByClassName('elkpwd');
+				elkport = sites[i].getElementsByClassName('elkport');
+
+
+				lenj = glclus.length
+				if (lenj < 1 ) {
+					alert("Atleast 1 Gray Log Config needed");
+					document.getElementById(dockerip).focus();
+				}
+
+				// Gl cluster
+				for (var j = 0; j < lenj; j++) {
+
+
+					jsonstr += '"' + glclus[j].value + '": ' +
+									'{ "vars": [ ' +
+									'{"gluname": "' + gluname[j].value + '"},' +
+									'{"glpwd": "' + glpwd[j].value + '"},' +
+									'{"mongouname": "' + mongouname[j].value + '"},' +
+									'{"mongopwd": "' + mongopwd[j].value + '"},' +
+									'{"mongoport": "' + mongoport[j].value + '"} ' +
+									'],' +
+									'"hosts": ' +
+										'{"hostip": [ ]}' +
+									'},' ;
+
+				}
+
+				for (var k = 0; k < lenj; k++) {
+					jsonstr += '"' + elkclus[k].value + '": ' +
+									'{ "vars": [' +
+									'{"name": "' + elkclus[k].value + '"},' +
+									'{"elkuname": "' + elkuname[k].value + '"},' +
+									'{"elkpwd": "' +elkpwd[k].value + '"},' +
+									'{"elkport": "' + elkport[k].value + '"}' +
+									'],' +
+									'"hosts": ' +
+										'{"hostip": [ ]}' +
+									'}' ;
+
+
+				}
+				jsonstr += '}},';
+			}
+			njsonstr = jsonstr.slice(0, -1)
+			njsonstr += '}}}}}}} ';
+			njsonstr += ']';
+			// console.dir(fullsitear, {'maxArrayLength': null});
+			console.log(njsonstr);
+
+		}
+
+		function sendJSON() {
+			var data = {
+				firstName: "Test2",
+				lastName: "L T2",
+				Age: 11
+			};
+
+			var json = JSON.stringify(data);
+
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", "/ansible");
+			xhr.setRequestHeader("Content-Type", "application/json");
+			xhr.send(json);
+		}
+
+		function getData(){
+
+			let scriptBox = document.getElementById('scriptMsg');
+			let scriptButton = document.getElementById('scriptButton');
+			scriptButton.setAttribute("disabled", true);
+			const postHeader = {
+				method: 'POST',
+				headers: {
+				  'Content-Type': 'application/json'
+				}
+			};
+			setTimeout(function(){
+				fetch('http://localhost:3000/ansible', postHeader).then(res => res.json()).then(data => {
+					scriptBox.innerHTML += data.message;
+					scriptButton.removeAttribute("disabled");
+
+				});
+			}, 5000);
+
+		}
+
+
+
+
+	</script>
+
+</html>
