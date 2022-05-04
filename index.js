@@ -1,8 +1,10 @@
+const http = require('http');
 const path = require('path');
 const express = require('express');
 const cors = require("cors");
 
 const app = express();
+const server = http.createServer(app);
 
 var corsOptions = {
   //origin: "http://localhost:8000"
@@ -28,7 +30,7 @@ app.post("/ansible",async function(req, res) {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
 
