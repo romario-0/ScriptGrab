@@ -2,6 +2,7 @@ const http = require('http');
 const path = require('path');
 const express = require('express');
 const cors = require("cors");
+const socketio = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
@@ -16,6 +17,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+const io = socketio(server);
+
 app.post("/ansible",async function(req, res) {
   const { exec } = require('child_process');
   var yourscript = await exec('sh test.sh',
@@ -27,6 +30,10 @@ app.post("/ansible",async function(req, res) {
                   res.send({error : error});
               }
   });
+});
+
+io.on('connection', socket => {
+    socket.emit('message', 'Connected to server');
 });
 
 const PORT = process.env.PORT || 3000;
